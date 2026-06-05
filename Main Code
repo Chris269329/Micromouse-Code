@@ -1,0 +1,128 @@
+//Set up motor pins
+int motor1pin1 = 2;
+int motor1pin2 = 3;
+int motor2pin1 = 4;
+int motor2pin2 = 5;
+
+//Set up sonar pins
+const int trigPinF = 6;
+const int echoPinF = 11;
+const int trigPinR = 12;
+const int echoPinR = 13;
+const int trigPinL = 7;
+const int echoPinL = 8;
+
+//Create variables for calculating distance from walls
+float durationF;
+float durationL;
+float durationR;
+float distanceF;
+float distanceL;
+float distanceR;
+//Pin 10 controls right motor speed
+//Pin 9 controls left motor speed
+
+
+void setup() {
+  // put your setup code here, to run once:
+
+//Initializes output and input pins for motors, motor speed, and sonar sensors
+pinMode(motor1pin1, OUTPUT);
+ pinMode(motor1pin2, OUTPUT);
+ pinMode(motor2pin1, OUTPUT);
+ pinMode(motor2pin2, OUTPUT);
+ pinMode(10, OUTPUT);
+ pinMode(9, OUTPUT);
+ pinMode(trigPinF, OUTPUT);
+ pinMode(echoPinF, INPUT);
+ pinMode(trigPinR, OUTPUT);
+ pinMode(echoPinR, INPUT);
+ pinMode(trigPinL, OUTPUT);
+ pinMode(echoPinL, INPUT);
+ Serial.begin(9600);
+}
+void loop() {
+//Activate front sonar sensor and calculate the distance
+  Serial.print("Distance: ");
+  Serial.println(distanceF);  
+ digitalWrite(trigPinF, LOW);
+ delayMicroseconds(2);
+ digitalWrite(trigPinF, HIGH);
+ delayMicroseconds(4);
+ digitalWrite(trigPinF, LOW);
+
+ durationF = pulseIn(echoPinF, HIGH);
+ distanceF = (durationF*.034)/2;
+
+//Activate right sonar sensor and calculate the distance
+ digitalWrite(trigPinR, LOW);
+ delayMicroseconds(2);
+ digitalWrite(trigPinR, HIGH);
+ delayMicroseconds(4);
+ digitalWrite(trigPinR, LOW);
+
+ durationR = pulseIn(echoPinR, HIGH);
+ distanceR = (durationR*.034)/2;
+
+//Activate left sonar sensor and calculate the distance
+ digitalWrite(trigPinL, LOW);
+ delayMicroseconds(2);
+ digitalWrite(trigPinL, HIGH);
+ delayMicroseconds(4);
+ digitalWrite(trigPinL, LOW);
+
+ durationL = pulseIn(echoPinL, HIGH);
+ distanceL = (durationL*.034)/2;
+
+//If there is a wall in front, turn
+ if (distanceF <= 5.2) {
+  if (distanceR < distanceL){
+//Left Turn
+   //Sets speed for motors
+   analogWrite(10, 74);
+   analogWrite(9, 88);
+   //Alternates directions of the motors
+   digitalWrite(motor1pin1, LOW);
+   digitalWrite(motor1pin2, HIGH);
+   digitalWrite(motor2pin1, HIGH);
+   digitalWrite(motor2pin2, LOW);
+  }
+  else if (distanceL <= distanceR) {
+//Right Turn
+   //Sets speed for motors
+   analogWrite(10, 89);
+   analogWrite(9, 62);
+   //Alternates directions of the motors
+   digitalWrite(motor1pin1, HIGH);
+   digitalWrite(motor1pin2, LOW);
+   digitalWrite(motor2pin1, LOW);
+   digitalWrite(motor2pin2, HIGH);
+  }
+ }
+ else{
+  //Sets speed for motors
+  analogWrite(10, 63);
+  analogWrite(9, 54);
+  //if the left wall is too close, adjust right
+    if (distanceL < 2.2){
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
+  }
+  //if the right wall is too close, adjust left
+  else if (distanceR < 2.2){
+  digitalWrite(motor1pin1, LOW);
+  digitalWrite(motor1pin2, HIGH);
+  digitalWrite(motor2pin1, HIGH);
+  digitalWrite(motor2pin2, LOW);
+  }
+  //When no conditions are met, drive straight
+  else{
+  digitalWrite(motor1pin1, LOW); 
+  digitalWrite(motor1pin2, HIGH);
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
+  }
+ }
+}
